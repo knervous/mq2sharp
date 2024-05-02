@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "*.in": "cpp",
+        "ccomplex": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "vector": "cpp",
+        "xmemory": "cpp",
+        "xstddef": "cpp",
+        "xstring": "cpp",
+        "filesystem": "c",
+        "istream": "c",
+        "tuple": "c",
+        "xlocale": "c"
+    }
+}
