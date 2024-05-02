@@ -137,6 +137,21 @@ public static class MQInterface
                 case EventSubtype.Event_Zoned:
                     break;
                 case EventSubtype.Event_UpdateImGui:
+                	if (MQ2Sharp.GetGameState() == MQ2Sharp.GAMESTATE_INGAME)
+                        {
+                            var pBool = MQ2Sharp.new_boolp();
+                            MQ2Sharp.boolp_assign(pBool, true);
+                            
+                            if (MQ2Sharp.Begin("MQ2Sharp", pBool, (int)ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+                            {
+                                if (MQ2Sharp.BeginMenuBar())
+                                {
+                                    MQ2Sharp.Text("Dotnet is loaded and rendering IMGUI!");
+                                    MQ2Sharp.EndMenuBar();
+                                }
+                            }
+                            MQ2Sharp.End();
+                        }
                     break;
             }
         }

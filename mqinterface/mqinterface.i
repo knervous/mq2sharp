@@ -68,8 +68,14 @@
 %include <std_shared_ptr.i>
 %include <stdint.i>
 %include <std_string.i>
+%include <typemaps.i>
+
+%include "csharp.swg" // C# specific SWIG library
 
 %apply uint32_t { typename std::make_unsigned<int>::type };
+
+// Map bool* to out bool in C#
+
 
 
 %inline %{
@@ -156,3 +162,20 @@ struct fmt::v10::formatter<eqlib::CXStr> : fmt::v10::formatter<fmt::v10::string_
 %include "eqlib/EverQuest.h"
 %include "eqlib/GraphicsEngine.h"
 %include "eqlib/EQClasses.h"
+
+%include cpointer.i
+%pointer_functions(bool, boolp);
+
+// %typemap(csout, excode=SWIGEXCODE) bool * {
+//   $csclassname result;
+//   $excode
+//   if ($imcall) {
+//     $1 = &$imresult;
+//   }
+//   $excode
+//   return result;
+// }
+
+// %typemap(csin, excode=SWIGEXCODE) bool *p_open  {
+//   $1 = &$csinput;
+// }

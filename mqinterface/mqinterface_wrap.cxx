@@ -441,6 +441,27 @@ void MQLog(const std::string& msg, int color, int filter) {
 #include <memory>
 
 
+static bool *new_boolp(void) { 
+  return new bool(); 
+}
+
+static bool *copy_boolp(bool value) { 
+  return new bool(value); 
+}
+
+static void delete_boolp(bool *obj) { 
+  delete obj; 
+}
+
+static void boolp_assign(bool *obj, bool value) {
+  *obj = value;
+}
+
+static bool boolp_value(bool *obj) {
+  return *obj;
+}
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -110712,6 +110733,58 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_CTargetManager(void * jarg1) {
   
   arg1 = (eqlib::CTargetManager *)jarg1; 
   delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_boolp() {
+  void * jresult ;
+  bool *result = 0 ;
+  
+  result = (bool *)new_boolp();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_copy_boolp(unsigned int jarg1) {
+  void * jresult ;
+  bool arg1 ;
+  bool *result = 0 ;
+  
+  arg1 = jarg1 ? true : false; 
+  result = (bool *)copy_boolp(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_boolp(void * jarg1) {
+  bool *arg1 = (bool *) 0 ;
+  
+  arg1 = (bool *)jarg1; 
+  delete_boolp(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_boolp_assign(void * jarg1, unsigned int jarg2) {
+  bool *arg1 = (bool *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (bool *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  boolp_assign(arg1,arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_boolp_value(void * jarg1) {
+  unsigned int jresult ;
+  bool *arg1 = (bool *) 0 ;
+  bool result;
+  
+  arg1 = (bool *)jarg1; 
+  result = (bool)boolp_value(arg1);
+  jresult = result; 
+  return jresult;
 }
 
 
