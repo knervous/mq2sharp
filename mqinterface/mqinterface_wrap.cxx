@@ -368,6 +368,7 @@ template <typename T> T SwigValueInit() {
 #include "imgui/ImGuiUtils.h"
 
 #include "eqlib/Config.h"
+#include "eqlib/ChatFilters.h"
 #include "eqlib/PlayerClient.h"
 #include "eqlib/ForwardDecls.h"
 #include "eqlib/Items.h"
@@ -421,11 +422,16 @@ const char* type_name_string() {
     return "std::string";
 }
 
+
 namespace eqlib {
     ActorBase::~ActorBase() {
         // Implementation code
     }
 }
+void MQLog(const std::string& msg, int color, int filter) {
+    mq::WriteChatColor(msg.c_str(), color, filter);
+}
+
 
 
 
@@ -466,6 +472,23 @@ SWIGEXPORT char * SWIGSTDCALL CSharp_type_name_string() {
   result = (char *)type_name_string();
   jresult = SWIG_csharp_string_callback((const char *)result); 
   return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MQLog(const char * jarg1, int jarg2, int jarg3) {
+  std::string *arg1 = 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  MQLog((std::string const &)*arg1,arg2,arg3);
 }
 
 
@@ -3705,18 +3728,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_dsp_chat_no_events(char * jarg1, int jarg2, u
   arg3 = jarg3 ? true : false; 
   arg4 = jarg4 ? true : false; 
   mq::dsp_chat_no_events((char const *)arg1,arg2,arg3,arg4);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_WriteChatColor(char * jarg1, int jarg2, int jarg3) {
-  char *arg1 = (char *) 0 ;
-  int arg2 = (int) USERCOLOR_DEFAULT ;
-  int arg3 = (int) 0 ;
-  
-  arg1 = (char *)jarg1; 
-  arg2 = (int)jarg2; 
-  arg3 = (int)jarg3; 
-  mq::WriteChatColor((char const *)arg1,arg2,arg3);
 }
 
 
@@ -39568,6 +39579,1311 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EndColumnHeadersSync(void * jarg1, int jarg2)
   arg1 = (mq::imgui::ColumnHeader *)jarg1; 
   arg2 = (int)jarg2; 
   mq::imgui::EndColumnHeadersSync(arg1,arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_DEFAULT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x00);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_DARKGREY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x01);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_DARKGREEN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x02);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_DARKBLUE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x03);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_PURPLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x05);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COLOR_LIGHTGREY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x06);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_GREY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x06);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_GREEN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x02);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_LIGHTBLUE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x12);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_BLUE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x04);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_BLACK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x14);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_WHITE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x0a);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_YELLOW_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x0f);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CONCOLOR_RED_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0x0d);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SAY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(256);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_TELL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(257);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_GROUP_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(258);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_GUILD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(259);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OOC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(260);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_AUCTION_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(261);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SHOUT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(262);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_EMOTE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(263);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SPELLS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(264);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_YOU_HIT_OTHER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(265);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHER_HIT_YOU_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(266);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_YOU_MISS_OTHER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(267);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHER_MISS_YOU_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(268);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_DUELS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(269);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SKILLS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(270);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_DISCIPLINES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(271);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_UNUSED001_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(272);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_DEFAULT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(273);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_FACTION_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(274);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_MERCHANT_OFFER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(275);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_MERCHANT_EXCHANGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(276);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_YOUR_DEATH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(277);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHER_DEATH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(278);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHER_HIT_OTHER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(279);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHER_MISS_OTHER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(280);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_WHO_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(281);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_YELL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(282);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NON_MELEE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(283);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SPELL_WORN_OFF_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(284);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_MONEY_SPLIT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(285);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_LOOT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(286);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_RANDOM_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(287);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_OTHERS_SPELLS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(288);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SPELL_FAILURE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(289);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_CHANNEL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(290);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_1_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(291);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_2_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(292);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_3_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(293);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_4_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(294);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_5_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(295);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_6_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(296);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_7_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(297);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_8_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(298);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_9_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(299);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_CHAT_10_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(300);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_MELEE_CRIT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(301);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SPELL_CRIT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(302);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_TOO_FAR_AWAY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(303);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NPC_RAMPAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(304);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NPC_FLURRY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(305);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NPC_ENRAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(306);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_SAY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(307);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_TELL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(308);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_GROUP_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(309);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_GUILD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(310);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_OOC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(311);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_AUCTION_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(312);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_SHOUT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(313);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_EMOTE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(314);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_1_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(315);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_2_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(316);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_3_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(317);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_4_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(318);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_5_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(319);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_6_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(320);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_7_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(321);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_8_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(322);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_9_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(323);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ECHO_CHAT_10_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(324);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_AVATAR_CMD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(325);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_LINK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(326);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_RAID_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(327);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_PET_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(328);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_DAMAGESHIELD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(329);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_LEADER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(330);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_PETRAMPFLURRY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(331);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_PETCRITS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(332);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_FOCUS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(333);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_XP_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(334);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SYSTEM_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(335);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_PET_SPELLS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(336);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_PET_RESPONSES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(337);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_ITEM_SPEECH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(338);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_STRIKETHROUGH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(339);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_STUN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(340);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_SWARM_PET_DEATH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(341);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_FELLOWSHIP_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(342);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NPC_SPEECH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(343);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_NPC_SPEECH_TO_YOU_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(344);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_USERCOLOR_GUILD_MSG_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(345);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NUM_USER_COLORS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)eqlib::NUM_USER_COLORS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_gDefaultUserDefinedColors_set(void * jarg1) {
+  mq::MQColor *arg1 = (mq::MQColor *) (mq::MQColor *)0 ;
+  
+  arg1 = (mq::MQColor *)jarg1; 
+  {
+    size_t ii;
+    mq::MQColor *b = (mq::MQColor *) eqlib::gDefaultUserDefinedColors;
+    for (ii = 0; ii < (size_t)eqlib::NUM_USER_COLORS; ii++) b[ii] = *((mq::MQColor *) arg1 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_gDefaultUserDefinedColors_get() {
+  void * jresult ;
+  mq::MQColor *result = 0 ;
+  
+  result = (mq::MQColor *)(mq::MQColor *)eqlib::gDefaultUserDefinedColors;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterID_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilters arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (eqlib::eChatFilters)jarg2; 
+  if (arg1) (arg1)->ChatFilterID = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterID_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilters result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (eqlib::eChatFilters) ((arg1)->ChatFilterID);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_ChatColorID_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->ChatColorID = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_ChatColorID_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (int) ((arg1)->ChatColorID);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterOptions_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilterOptions arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (eqlib::eChatFilterOptions)jarg2; 
+  if (arg1) (arg1)->ChatFilterOptions = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterOptions_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilterOptions result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (eqlib::eChatFilterOptions) ((arg1)->ChatFilterOptions);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterDefault_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilterValues arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (eqlib::eChatFilterValues)jarg2; 
+  if (arg1) (arg1)->ChatFilterDefault = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterDefault_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  eqlib::eChatFilterValues result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (eqlib::eChatFilterValues) ((arg1)->ChatFilterDefault);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_NameToken_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->NameToken = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_NameToken_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (int) ((arg1)->NameToken);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_IniName_set(void * jarg1, char * jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if (arg2) {
+      arg1->IniName = (char const *) (new char[strlen((const char *)arg2)+1]);
+      strcpy((char *)arg1->IniName, (const char *)arg2);
+    } else {
+      arg1->IniName = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ChatColorFilterData_IniName_get(void * jarg1) {
+  char * jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (char *) ((arg1)->IniName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterCategories_set(void * jarg1, int jarg2) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int arg2 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->ChatFilterCategories = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ChatColorFilterData_ChatFilterCategories_get(void * jarg1) {
+  int jresult ;
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  int result;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  result = (int) ((arg1)->ChatFilterCategories);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ChatColorFilterData() {
+  void * jresult ;
+  eqlib::ChatColorFilterData *result = 0 ;
+  
+  result = (eqlib::ChatColorFilterData *)new eqlib::ChatColorFilterData();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ChatColorFilterData(void * jarg1) {
+  eqlib::ChatColorFilterData *arg1 = (eqlib::ChatColorFilterData *) 0 ;
+  
+  arg1 = (eqlib::ChatColorFilterData *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CHAT_COLORFILTER_COUNT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)eqlib::CHAT_COLORFILTER_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ChatFilterData_chatFilters_set(void * jarg1, void * jarg2) {
+  eqlib::ChatFilterData *arg1 = (eqlib::ChatFilterData *) 0 ;
+  eqlib::eChatFilterValues *arg2 = (eqlib::eChatFilterValues *) (eqlib::eChatFilterValues *)0 ;
+  
+  arg1 = (eqlib::ChatFilterData *)jarg1; 
+  arg2 = (eqlib::eChatFilterValues *)jarg2; 
+  {
+    size_t ii;
+    eqlib::eChatFilterValues *b = (eqlib::eChatFilterValues *) arg1->chatFilters;
+    for (ii = 0; ii < (size_t)eqlib::NUM_CHAT_FILTERS; ii++) b[ii] = *((eqlib::eChatFilterValues *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ChatFilterData_chatFilters_get(void * jarg1) {
+  void * jresult ;
+  eqlib::ChatFilterData *arg1 = (eqlib::ChatFilterData *) 0 ;
+  eqlib::eChatFilterValues *result = 0 ;
+  
+  arg1 = (eqlib::ChatFilterData *)jarg1; 
+  result = (eqlib::eChatFilterValues *)(eqlib::eChatFilterValues *) ((arg1)->chatFilters);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ChatFilterData() {
+  void * jresult ;
+  eqlib::ChatFilterData *result = 0 ;
+  
+  result = (eqlib::ChatFilterData *)new eqlib::ChatFilterData();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ChatFilterData(void * jarg1) {
+  eqlib::ChatFilterData *arg1 = (eqlib::ChatFilterData *) 0 ;
+  
+  arg1 = (eqlib::ChatFilterData *)jarg1; 
+  delete arg1;
 }
 
 
@@ -83200,28 +84516,22 @@ SWIGEXPORT int SWIGSTDCALL CSharp_EverQuestinfo_iActivityScriptId_get(void * jar
 
 SWIGEXPORT void SWIGSTDCALL CSharp_EverQuestinfo_ChatFilters_set(void * jarg1, void * jarg2) {
   eqlib::EverQuestinfo *arg1 = (eqlib::EverQuestinfo *) 0 ;
-  ChatFilterData arg2 ;
-  ChatFilterData *argp2 ;
+  eqlib::ChatFilterData *arg2 = (eqlib::ChatFilterData *) 0 ;
   
   arg1 = (eqlib::EverQuestinfo *)jarg1; 
-  argp2 = (ChatFilterData *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ChatFilterData", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->ChatFilters = arg2;
+  arg2 = (eqlib::ChatFilterData *)jarg2; 
+  if (arg1) (arg1)->ChatFilters = *arg2;
 }
 
 
 SWIGEXPORT void * SWIGSTDCALL CSharp_EverQuestinfo_ChatFilters_get(void * jarg1) {
   void * jresult ;
   eqlib::EverQuestinfo *arg1 = (eqlib::EverQuestinfo *) 0 ;
-  ChatFilterData result;
+  eqlib::ChatFilterData *result = 0 ;
   
   arg1 = (eqlib::EverQuestinfo *)jarg1; 
-  result =  ((arg1)->ChatFilters);
-  jresult = new ChatFilterData(result); 
+  result = (eqlib::ChatFilterData *)& ((arg1)->ChatFilters);
+  jresult = (void *)result; 
   return jresult;
 }
 

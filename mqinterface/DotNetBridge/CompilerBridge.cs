@@ -313,7 +313,7 @@ public static class MQInterface
     {
         // Convert IntPtr to string
         string message = Marshal.PtrToStringAnsi(args.Msg);
-        MQ2Sharp.WriteChatf($"String Event Message: {message}");
+        Logger.Log($"String Event Message: {message}");
 
         if (reload)
         {
@@ -409,7 +409,7 @@ public static class MQInterface
     {
         var workingDirectory = Directory.GetCurrentDirectory();
         var sharpDir = Path.Combine(workingDirectory, "sharp");
-        MQ2Sharp.WriteChatColor("Initialize from dotnet", (int)ConsoleColor.Yellow, 0);
+        Logger.Log("Initialize from dotnet");
         Console.WriteLine($"Watching for *.cs file changes in {sharpDir}");
 
         foreach (var timer in timers)

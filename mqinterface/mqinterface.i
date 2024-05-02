@@ -26,6 +26,7 @@
 #include "imgui/ImGuiUtils.h"
 
 #include "eqlib/Config.h"
+#include "eqlib/ChatFilters.h"
 #include "eqlib/PlayerClient.h"
 #include "eqlib/ForwardDecls.h"
 #include "eqlib/Items.h"
@@ -38,6 +39,9 @@
 #include "eqlib/GraphicsEngine.h"
 
 %}
+
+// %define eqlib::USERCOLOR_DEFAULT 273
+// %enddef
 
 %include <windows.i>
 
@@ -79,13 +83,19 @@ const char* type_name_string() {
     return "std::string";
 }
 
+
 namespace eqlib {
     ActorBase::~ActorBase() {
         // Implementation code
     }
 }
+void MQLog(const std::string& msg, int color, int filter) {
+    mq::WriteChatColor(msg.c_str(), color, filter);
+}
+
 
 %}
+
 
 
 // Mock the necessary fmt components for SWIG
@@ -134,6 +144,7 @@ struct fmt::v10::formatter<eqlib::CXStr> : fmt::v10::formatter<fmt::v10::string_
 %include "imgui/ImGuiUtils.h"
 
 %include "eqlib/Config.h"
+%include "eqlib/ChatFilters.h"
 %include "eqlib/PlayerClient.h"
 %include "eqlib/ForwardDecls.h"
 %include "eqlib/Items.h"

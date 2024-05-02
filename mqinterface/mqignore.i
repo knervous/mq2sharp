@@ -41,6 +41,8 @@
 %ignore mq::GroundObject;
 %ignore mq::pGroundTarget;
 
+%ignore eqlib::gpChatFilterDefs;
+
 %ignore eqlib::SFellowship::Leader;
 %ignore eqlib::SFellowship::FellowshipGUID;
 %ignore eqlib::PlayerManagerBase::FirstSpawn;
@@ -50,6 +52,7 @@
 %ignore eqlib::PlayerBase::MyFeetAreOnGround;
 %ignore eqlib::PlayerBase::IsAMount;
 %ignore eqlib::PlayerBase::GetVisibilityLineSegment;
+%ignore mq::WriteChatColor;
 
 %ignore eqlib::PlayerZoneClient::PlayerZoneClient;
 %ignore eqlib::PlayerZoneClient::SetArmorTint;

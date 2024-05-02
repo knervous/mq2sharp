@@ -6,7 +6,7 @@
 
 public class Logger {
     public static void Log(string message) {
-        MQ2Sharp.WriteChatColor(message, (int)ConsoleColor.Yellow, 0);
+        MQ2Sharp.MQLog(message, MQ2Sharp.CONCOLOR_YELLOW, 0);
     }
 }
 
