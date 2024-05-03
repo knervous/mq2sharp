@@ -39,7 +39,7 @@ PLUGIN_API void SetGameState(int GameState)
 
 PLUGIN_API void OnPulse()
 {
-	mq_event_fn(mq_event{ EventSubtype::Event_Pulse });
+	mq_event_fn(mq_event{ EventSubtype::Event_Pulse }); 
 }
 
 PLUGIN_API void OnWriteChatColor(const char* Line, int Color, int Filter)

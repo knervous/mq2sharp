@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -123,35 +124,67 @@ public static class MQInterface
             switch (args.Subtype)
             {
                 case EventSubtype.Event_CleanUI:
+                    foreach (var handler in handlers)
+                    {
+                        handler.CleanUI();
+                    }
                     break;
                 case EventSubtype.Event_ReloadUI:
+                    foreach (var handler in handlers)
+                    {
+                        handler.ReloadUI();
+                    }
                     break;
                 case EventSubtype.Event_DrawHUD:
+                    foreach (var handler in handlers)
+                    {
+                        handler.DrawHUD();
+                    }
                     break;
                 case EventSubtype.Event_Pulse:
+                    foreach (var handler in handlers)
+                    {
+                        handler.Pulse();
+                    }
                     break;
                 case EventSubtype.Event_BeginZone:
+                    foreach (var handler in handlers)
+                    {
+                        handler.BeginZone();
+                    }
                     break;
                 case EventSubtype.Event_EndZone:
+                    foreach (var handler in handlers)
+                    {
+                        handler.EndZone();
+                    }
                     break;
                 case EventSubtype.Event_Zoned:
+                    foreach (var handler in handlers)
+                    {
+                        handler.Zoned();
+                    }
                     break;
                 case EventSubtype.Event_UpdateImGui:
-                	if (MQ2Sharp.GetGameState() == MQ2Sharp.GAMESTATE_INGAME)
-                        {
-                            var pBool = MQ2Sharp.new_boolp();
-                            MQ2Sharp.boolp_assign(pBool, true);
-                            
-                            if (MQ2Sharp.Begin("MQ2Sharp", pBool, (int)ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
-                            {
-                                if (MQ2Sharp.BeginMenuBar())
-                                {
-                                    MQ2Sharp.Text("Dotnet is loaded and rendering IMGUI!");
-                                    MQ2Sharp.EndMenuBar();
-                                }
-                            }
-                            MQ2Sharp.End();
-                        }
+                    foreach (var handler in handlers)
+                    {
+                        handler.UpdateImGui();
+                    }
+                    // if (MQ2Sharp.GetGameState() == MQ2Sharp.GAMESTATE_INGAME)
+                    //     {
+                    //         var pBool = MQ2Sharp.new_boolp();
+                    //         MQ2Sharp.boolp_assign(pBool, true);
+
+                    //         if (MQ2Sharp.Begin("MQ2Sharp", pBool, (int)ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+                    //         {
+                    //             if (MQ2Sharp.BeginMenuBar())
+                    //             {
+                    //                 MQ2Sharp.Text("Dotnet is loaded and rendering IMGUI!");
+                    //                 MQ2Sharp.EndMenuBar();
+                    //             }
+                    //         }
+                    //         MQ2Sharp.End();
+                    //     }
                     break;
             }
         }
@@ -161,11 +194,11 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
@@ -180,7 +213,10 @@ public static class MQInterface
         }
         try
         {
-
+            foreach (var handler in handlers)
+            {
+                handler.SetGameState(args.EventType);
+            }
         }
         catch (Exception e)
         {
@@ -188,11 +224,11 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype :: {e.Message}");
+            Logger.Log($"Error running sharp subtype :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
@@ -210,7 +246,11 @@ public static class MQInterface
         {
             // Convert IntPtr to string
             string message = Marshal.PtrToStringAnsi(args.Line);
-            Console.WriteLine($"Chat Line: {message}, Color: {args.Color}, Filter: {args.Filter}");
+
+            foreach (var handler in handlers)
+            {
+                handler.WriteChatColor(message ?? "", args.Color, args.Filter);
+            }
         }
         catch (Exception e)
         {
@@ -218,42 +258,48 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype :: {e.Message}");
+            Logger.Log($"Error running sharp subtype :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
     }
 
 
-    public static void IncomingChatEventMethod(IncomingChatEvent args)
+    public static bool IncomingChatEventMethod(IncomingChatEvent args)
     {
         if (reload)
         {
-            return;
+            return true;
         }
+        bool ret = true;
         try
         {
             string message = Marshal.PtrToStringAnsi(args.Line);
-            Console.WriteLine($"Incoming Chat Line: {message}, Color: {args.Color}");
+            foreach (var handler in handlers)
+            {
+                ret = ret || handler.IncomingChat(message ?? "", args.Color);
+            }
+            Logger.Log($"Incoming Chat Line: {message}, Color: {args.Color}");
         }
         catch (Exception e)
         {
             if (reload)
             {
-                return;
+                return ret;
             }
-            Console.WriteLine($"Error running sharp subtype :: {e.Message}");
+            Logger.Log($"Error running sharp subtype :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
+        return ret;
     }
 
 
@@ -266,13 +312,20 @@ public static class MQInterface
         try
         {
             var spawn = EqFactory.CreatePlayerClient(args.Spawn, false);
+            
             switch (args.Subtype)
             {
                 case EventSubtype.Event_AddSpawn:
-                    Logger.Log($"Spawn: {spawn.Name}");
+                    foreach (var handler in handlers)
+                    {
+                        handler.AddSpawn(spawn);
+                    }
                     break;
                 case EventSubtype.Event_RemoveSpawn:
-                    Logger.Log($"Despawn: {spawn.Name}");
+                    foreach (var handler in handlers)
+                    {
+                        handler.RemoveSpawn(spawn);
+                    }
                     break;
             }
         }
@@ -282,11 +335,11 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
@@ -300,11 +353,20 @@ public static class MQInterface
         }
         try
         {
+            // Don't have wrapper hooked up yet for ground item
             switch (args.Subtype)
             {
                 case EventSubtype.Event_AddGroundItem:
+                    foreach (var handler in handlers)
+                    {
+                        handler.AddGroundItem();
+                    }
                     break;
                 case EventSubtype.Event_RemoveGroundItem:
+                    foreach (var handler in handlers)
+                    {
+                        handler.AddGroundItem();
+                    }
                     break;
             }
         }
@@ -314,11 +376,11 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
@@ -327,8 +389,7 @@ public static class MQInterface
     public static void StringEventMethod(StringEvent args)
     {
         // Convert IntPtr to string
-        string message = Marshal.PtrToStringAnsi(args.Msg);
-        Logger.Log($"String Event Message: {message}");
+        string message = Marshal.PtrToStringAnsi(args.Msg) ?? "";
 
         if (reload)
         {
@@ -339,12 +400,28 @@ public static class MQInterface
             switch (args.Subtype)
             {
                 case EventSubtype.Event_MacroStart:
+                    foreach (var handler in handlers)
+                    {
+                        handler.MacroStart(message);
+                    }
                     break;
                 case EventSubtype.Event_MacroStop:
+                    foreach (var handler in handlers)
+                    {
+                        handler.MacroStop(message);
+                    }
                     break;
                 case EventSubtype.Event_LoadPlugin:
+                    foreach (var handler in handlers)
+                    {
+                        handler.LoadPlugin(message);
+                    }
                     break;
                 case EventSubtype.Event_UnloadPlugin:
+                    foreach (var handler in handlers)
+                    {
+                        handler.UnloadPlugin(message);
+                    }
                     break;
             }
         }
@@ -354,16 +431,17 @@ public static class MQInterface
             {
                 return;
             }
-            Console.WriteLine($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
             {
-                Console.WriteLine($"Error running sharp. Inner Exception: {inner.Message}");
+                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
                 inner = inner.InnerException;
             }
         }
     }
     private static bool reload = false;
+    private static List<MQEventHandler> handlers = [];
     private static List<System.Timers.Timer> timers = new List<System.Timers.Timer>();
 
     private static System.Timers.Timer PollForChanges(string path, Action callback)
@@ -383,7 +461,7 @@ public static class MQInterface
 
             if (lastWriteTime > lastCheck)
             {
-                Console.WriteLine($"Detected change in .cs file in {path}- Reloading sharp");
+                Logger.Log($"Detected change in .cs file in {path}- Reloading sharp");
                 callback();
                 lastCheck = lastWriteTime;
             }
@@ -396,7 +474,7 @@ public static class MQInterface
     {
         if (!Directory.Exists(path))
         {
-            Console.WriteLine($"DirHash path not found: {path}");
+            Logger.Log($"DirHash path not found: {path}");
             return "";
         }
 
@@ -422,13 +500,16 @@ public static class MQInterface
 
     public static void Initialize()
     {
-        var workingDirectory = Directory.GetCurrentDirectory();
-        var sharpDir = Path.Combine(workingDirectory, "sharp");
+        try {
+        string assemblyPath = Assembly.GetExecutingAssembly().Location;
+        string directory = Path.GetDirectoryName(assemblyPath);
+        var sharpDir = Path.Combine(directory, "sharp");
         Logger.Log("Initialize from dotnet");
-        Console.WriteLine($"Watching for *.cs file changes in {sharpDir}");
+        Logger.Log($"Watching for *.cs file changes in {sharpDir}");
 
         // Example of adding a /command and handling it in C#
-        EQCommands.AddCommand("/sharp", (player, message) => {
+        EQCommands.AddCommand("/sharp", (player, message) =>
+        {
             Logger.Log($"Got sharp command with args: {message} - My player name {player.Name}");
         }, false, false, true);
 
@@ -444,6 +525,10 @@ public static class MQInterface
         }
 
         timers.Add(PollForChanges(sharpDir, ReloadSharpAsync));
+        } catch (Exception e) { 
+        Logger.Log($"Got Exception {e.Message}");
+        }
+       
     }
 
     public static void ReloadSharpAsync()
@@ -455,10 +540,11 @@ public static class MQInterface
     {
         get
         {
-            var workingDirectory = Directory.GetCurrentDirectory();
-            var hash = GetDirHash($"{workingDirectory}/sharp");
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string directory = Path.GetDirectoryName(assemblyPath);
+            var hash = GetDirHash($"{directory}/sharp");
             var sharpGuid = $"sharp-{hash}";
-            return $"{workingDirectory}/sharp/out/{sharpGuid}.dll";
+            return $"{directory}/sharp/out/{sharpGuid}.dll";
         }
     }
 
@@ -472,7 +558,7 @@ public static class MQInterface
         using (var mutex = new LockfileMutex("lockSharpAssemblyReload.lock"))
         {
             var firstAcquire = mutex.Acquire();
-            Console.WriteLine($"Acquired first lock: {firstAcquire}");
+            Logger.Log($"Acquired first lock: {firstAcquire}");
             var counter = 0;
             if (!firstAcquire)
             {
@@ -480,7 +566,7 @@ public static class MQInterface
                 {
                     if (counter++ % 10 == 0)
                     {
-                        Console.WriteLine("Waiting to acquire sharp lock...");
+                        Logger.Log("Waiting to acquire sharp lock...");
                     }
                     Thread.Sleep(100);
                     if (File.Exists(SharpAssemblyPath))
@@ -497,14 +583,14 @@ public static class MQInterface
     public static void ReloadSharp(bool firstAcquire)
     {
         reload = true;
-
-        if (sharpAssembly?.GetType("Sharp")?.GetMethod("Dispose") != null)
+        foreach (var handler in handlers)
         {
-            sharpAssembly.GetType("Sharp")?.GetMethod("Dispose")?.Invoke(null, []);
+            handler.Dispose();
         }
-        var workingDirectory = Directory.GetCurrentDirectory();
-        var directoryPath = $"{workingDirectory}/sharp";
-        var outPath = $"{workingDirectory}/sharp/out";
+        string assemblyPath = Assembly.GetExecutingAssembly().Location;
+        string directory = Path.GetDirectoryName(assemblyPath);
+        var directoryPath = $"{directory}/sharp";
+        var outPath = $"{directory}/sharp/out";
         var projPath = $"{directoryPath}/sharp.csproj";
         var hash = GetDirHash(directoryPath);
         var sharpGuid = $"sharp-{hash}";
@@ -517,7 +603,7 @@ public static class MQInterface
             var continueBuild = false;
             while (!File.Exists(SharpAssemblyPath))
             {
-                Console.WriteLine($"Waiting for another process to build {sharpAssemblyPath} before continuing {counter} / 20");
+                Logger.Log($"Waiting for another process to build {sharpAssemblyPath} before continuing {counter} / 20");
                 Thread.Sleep(1000);
                 if (counter++ > 20)
                 {
@@ -533,9 +619,14 @@ public static class MQInterface
                     {
                         assemblyContext_ = new CollectibleAssemblyLoadContext(outPath);
                         sharpAssembly = assemblyContext_.LoadFromAssemblyPath(sharpAssemblyPath);
-                        if (sharpAssembly.GetType("Sharp")?.GetMethod("Init") != null)
+                        if (sharpAssembly.GetType("Sharp") != null)
                         {
-                            sharpAssembly.GetType("Sharp")?.GetMethod("Init")?.Invoke(null, []);
+                            var Sharp = Activator.CreateInstance(sharpAssembly.GetType("Sharp")) as MQEventHandler;
+                            if (Sharp != null)
+                            {
+                                handlers.Add(Sharp);
+                                Sharp.Main();
+                            }
                         }
 
                         reload = false;
@@ -544,7 +635,7 @@ public static class MQInterface
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Error loading existing sharp lib, continuing to recompile. {e.Message}");
+                        Logger.Log($"Error loading existing sharp lib, continuing to recompile. {e.Message}");
                     }
                 }
             }
@@ -552,25 +643,30 @@ public static class MQInterface
 
         if (File.Exists(sharpAssemblyPath))
         {
-            Console.WriteLine($"sharp dotnet lib up to date");
+            Logger.Log($"sharp dotnet lib up to date");
             if (assemblyContext_ == null)
             {
                 try
                 {
                     assemblyContext_ = new CollectibleAssemblyLoadContext(outPath);
                     sharpAssembly = assemblyContext_.LoadFromAssemblyPath(sharpAssemblyPath);
-                    if (sharpAssembly.GetType("Sharp")?.GetMethod("Init") != null)
+                    if (sharpAssembly.GetType("Sharp") != null)
                     {
-                        sharpAssembly.GetType("Sharp")?.GetMethod("Init")?.Invoke(null, []);
+                        var Sharp = Activator.CreateInstance(sharpAssembly.GetType("Sharp")) as MQEventHandler;
+                        if (Sharp != null)
+                        {
+                            handlers.Add(Sharp);
+                            Sharp.Main();
+                        }
                     }
-                    Console.WriteLine($"Successfully loaded .NET sharp quests with {sharpAssembly.GetTypes().Count()} exported types.");
+                    Logger.Log($"Successfully loaded .NET sharp quests with {sharpAssembly.GetTypes().Count()} exported types.");
                     reload = false;
                     return;
 
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Error loading existing sharp lib, continuing to recompile. {e.Message}");
+                    Logger.Log($"Error loading existing sharp lib, continuing to recompile. {e.Message}");
 
                 }
 
@@ -588,7 +684,7 @@ public static class MQInterface
 
         if (!File.Exists(projPath))
         {
-            Console.WriteLine($"Project path does not exist at {projPath}");
+            Logger.Log($"Project path does not exist at {projPath}");
             return;
         }
         if (Directory.Exists(outPath))
@@ -605,9 +701,9 @@ public static class MQInterface
                 {
                     File.Delete(file);
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"An error occurred while deleting file {file}: {ex.Message}");
+                    // Logger.Log($"An error occurred while deleting file {file}: {ex.Message}");
                 }
             }
         }
@@ -616,20 +712,20 @@ public static class MQInterface
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = Path.Combine(workingDirectory + "/bin/dotnet/DotNetCompiler"),
+            FileName = Path.Combine(directory, "DotNetCompiler.exe"),
             Arguments = $"{sharpGuid} {outPath} {directoryPath}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
-            WorkingDirectory = directoryPath,
+            WorkingDirectory = directory,
         };
 
         using (var process = Process.Start(startInfo))
         {
             if (process == null)
             {
-                Console.WriteLine($"Process was null when loading sharp");
+                Logger.Log($"Process was null when loading sharp");
                 return;
             }
             try
@@ -639,30 +735,35 @@ public static class MQInterface
                 string errorOutput = process.StandardError.ReadToEnd();
                 if (errorOutput.Length > 0 || output.Contains("FAILED"))
                 {
-                    Console.WriteLine($"Error compiling sharp:");
-                    Console.WriteLine(errorOutput);
-                    Console.WriteLine(output);
+                    Logger.Log($"Error compiling sharp:");
+                    Logger.Log(errorOutput);
+                    Logger.Log(output);
                 }
                 else
                 {
-                    Console.WriteLine(output);
-                    Console.WriteLine($"Loading sharp assembly from: {sharpAssemblyPath}");
+                    Logger.Log(output);
+                    Logger.Log($"Loading sharp assembly from: {sharpAssemblyPath}");
                     if (!File.Exists(sharpAssemblyPath))
                     {
                         ReloadSharp(true);
                         return;
                     }
                     sharpAssembly = assemblyContext_.LoadFromAssemblyPath(sharpAssemblyPath);
-                    Console.WriteLine($"Successfully compiled MQ2Sharp with {sharpAssembly.GetTypes().Count()} exported types.");
-                    if (sharpAssembly.GetType("ZoneLoad")?.GetMethod("Init") != null)
+                    Logger.Log($"Successfully compiled MQ2Sharp with {sharpAssembly.GetTypes().Count()} exported types.");
+                    if (sharpAssembly.GetType("Sharp") != null)
                     {
-                        sharpAssembly.GetType("ZoneLoad")?.GetMethod("Init")?.Invoke(null, []);
+                        var Sharp = Activator.CreateInstance(sharpAssembly.GetType("Sharp")) as MQEventHandler;
+                        if (Sharp != null)
+                        {
+                            handlers.Add(Sharp);
+                            Sharp.Main();
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception in loading sharp quests {e.Message}");
+                Logger.Log($"Exception in loading sharp quests {e.Message}");
             }
         }
         reload = false;

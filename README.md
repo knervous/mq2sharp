@@ -6,6 +6,8 @@
 
 Quick start instructions to get users up and going
 
+Copy the sharp folder into the root build directory
+
 ```txt
 /plugin MQ2Sharp
 ```

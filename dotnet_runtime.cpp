@@ -327,7 +327,7 @@ void initialize()
 	}
 
 	std::string path = GetModuleDirectory();
-	std::filesystem::path currentPath = std::filesystem::path(path);
+	std::filesystem::path currentPath = std::filesystem::path(path).parent_path();
 	std::filesystem::path dotnetPath; 
 	const std::string roslyn_dll("DotNetBridge.dll");
 	for (const auto& entry : fs::recursive_directory_iterator(currentPath, fs::directory_options::follow_directory_symlink)) {

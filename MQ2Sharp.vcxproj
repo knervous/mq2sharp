@@ -67,9 +67,9 @@
     <PreBuildEvent>
       <Command>if exist "$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), tools\build_scripts\Plugin_Versioning.ps1))\tools\build_scripts\Plugin_Versioning.ps1" powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), tools\build_scripts\Plugin_Versioning.ps1))\tools\build_scripts\Plugin_Versioning.ps1" -ProjectName "$(MSBuildProjectName)" -ProjectDirectory "$([MSBuild]::EnsureTrailingSlash('$(MSBuildThisFileDirectory)'))\"
 if "$(Platform)" == "Win32" (
-  dotnet publish "$(ProjectDir)mqinterface\mqinterface.sln" -r win-x86 -c Release --output "$(OutDir)"
+  dotnet publish "$(ProjectDir)mqinterface\mqinterface.sln" -r win-x86 -c Release --output "$(OutDir)..\"
 ) else if "$(Platform)" == "x64" (
-  dotnet publish "$(ProjectDir)mqinterface\mqinterface.sln" -r win-x64 -c Release --output "$(OutDir)"
+  dotnet publish "$(ProjectDir)mqinterface\mqinterface.sln" -r win-x64 -c Release --output "$(OutDir)..\"
 )
 </Command>
       <Message>Updating version resource for $(MSBuildProjectName)...</Message>
