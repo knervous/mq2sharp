@@ -587,6 +587,7 @@ public static class MQInterface
         {
             handler.Dispose();
         }
+        handlers.Clear();
         string assemblyPath = Assembly.GetExecutingAssembly().Location;
         string directory = Path.GetDirectoryName(assemblyPath);
         var directoryPath = $"{directory}/sharp";
