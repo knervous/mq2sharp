@@ -13,7 +13,7 @@ PLUGIN_API void InitializePlugin()
 
 PLUGIN_API void ShutdownPlugin()
 {
-	DebugSpewAlways("MQ2Sharp::Shutting down");
+	DebugSpewAlways("MQ2Sharp::Shutting down"); 
 	shutdown();
 }
 

@@ -5,6 +5,7 @@
 %module MQ2Sharp
 
 %include "mqignore.i"
+%include "std_function.i"
 
 %{
 
@@ -129,6 +130,31 @@ struct fmt::v10::formatter<eqlib::CXStr> : fmt::v10::formatter<fmt::v10::string_
     }
 };
 
+%pragma(csharp) modulecode=%{
+public delegate void fEQCommandConstChar(IntPtr client, IntPtr message);
+%}
+
+%typemap(cstype) fEQCommandConstChar "fEQCommandConstChar";
+%typemap(imtype) fEQCommandConstChar "IntPtr";
+%typemap(csimtype) fEQCommandConstChar "IntPtr";
+%typemap(csin) fEQCommandConstChar "global::System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate($csinput)"
+%typemap(in) fEQCommandConstChar {
+    $1 = (fEQCommandConstChar)$input;
+}
+
+%std_function(EQCmnd, void, eqlib::PlayerClient*, const char*);
+
+
+%inline %{
+std::function<void(eqlib::PlayerClient* , const char*)> make_eqcmd_func(fEQCommandConstChar cmd) {
+    return [cmd](eqlib::PlayerClient* c, const char* y){
+        cmd(c, y);
+    };
+}
+
+%}
+
+
 %include "../dotnet_runtime.h"
 %include "mq/base/Common.h"
 %include "mq/base/Deprecation.h"
@@ -142,6 +168,7 @@ struct fmt::v10::formatter<eqlib::CXStr> : fmt::v10::formatter<fmt::v10::string_
 %include "main/MQ2Commands.h"
 %include "main/MQ2Globals.h"
 %include "main/MQ2ImGuiTools.h"
+%include "main/MQ2Prototypes.h"
 // %include "main/MQ2Internal.h"
 %include "main/MQDataAPI.h"
 
@@ -166,16 +193,3 @@ struct fmt::v10::formatter<eqlib::CXStr> : fmt::v10::formatter<fmt::v10::string_
 %include cpointer.i
 %pointer_functions(bool, boolp);
 
-// %typemap(csout, excode=SWIGEXCODE) bool * {
-//   $csclassname result;
-//   $excode
-//   if ($imcall) {
-//     $1 = &$imresult;
-//   }
-//   $excode
-//   return result;
-// }
-
-// %typemap(csin, excode=SWIGEXCODE) bool *p_open  {
-//   $1 = &$csinput;
-// }

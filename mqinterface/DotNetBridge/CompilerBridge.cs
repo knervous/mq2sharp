@@ -427,6 +427,11 @@ public static class MQInterface
         Logger.Log("Initialize from dotnet");
         Console.WriteLine($"Watching for *.cs file changes in {sharpDir}");
 
+        // Example of adding a /command and handling it in C#
+        EQCommands.AddCommand("/sharp", (player, message) => {
+            Logger.Log($"Got sharp command with args: {message} - My player name {player.Name}");
+        }, false, false, true);
+
         foreach (var timer in timers)
         {
             timer.Stop();

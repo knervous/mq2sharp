@@ -349,6 +349,9 @@ template <typename T> T SwigValueInit() {
 #endif
 
 
+  #include <functional>
+
+
 
 #include <string>
 #include <list>
@@ -435,6 +438,14 @@ void MQLog(const std::string& msg, int color, int filter) {
 
 
 
+std::function<void(eqlib::PlayerClient* , const char*)> make_eqcmd_func(fEQCommandConstChar cmd) {
+    return [cmd](eqlib::PlayerClient* c, const char* y){
+        cmd(c, y);
+    };
+}
+
+
+
 #include <string.h>
 
 
@@ -510,6 +521,56 @@ SWIGEXPORT void SWIGSTDCALL CSharp_MQLog(const char * jarg1, int jarg2, int jarg
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   MQLog((std::string const &)*arg1,arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQCmnd(void * jarg1) {
+  void * jresult ;
+  std::function< void (eqlib::PlayerClient *,char const *) > *arg1 = 0 ;
+  std::function< void (eqlib::PlayerClient *,char const *) > *result = 0 ;
+  
+  arg1 = (std::function< void (eqlib::PlayerClient *,char const *) > *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::function< void (eqlib::PlayerClient *,char const *) > const & is null", 0);
+    return 0;
+  } 
+  result = (std::function< void (eqlib::PlayerClient *,char const *) > *)new std::function< void (eqlib::PlayerClient *,char const *) >((std::function< void (eqlib::PlayerClient *,char const *) > const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQCmnd_call(void * jarg1, void * jarg2, char * jarg3) {
+  std::function< void (eqlib::PlayerClient *,char const *) > *arg1 = (std::function< void (eqlib::PlayerClient *,char const *) > *) 0 ;
+  eqlib::PlayerClient *arg2 = (eqlib::PlayerClient *) 0 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (std::function< void (eqlib::PlayerClient *,char const *) > *)jarg1; 
+  arg2 = (eqlib::PlayerClient *)jarg2; 
+  arg3 = (char *)jarg3; 
+  ((std::function< void (eqlib::PlayerClient *,char const *) > const *)arg1)->operator ()(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQCmnd(void * jarg1) {
+  std::function< void (eqlib::PlayerClient *,char const *) > *arg1 = (std::function< void (eqlib::PlayerClient *,char const *) > *) 0 ;
+  
+  arg1 = (std::function< void (eqlib::PlayerClient *,char const *) > *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_make_eqcmd_func(void * jarg1) {
+  void * jresult ;
+  fEQCommandConstChar arg1 ;
+  SwigValueWrapper< std::function< void (eqlib::PlayerClient *,char const *) > > result;
+  
+  {
+    arg1 = (fEQCommandConstChar)jarg1;
+  }
+  result = make_eqcmd_func(SWIG_STD_MOVE(arg1));
+  jresult = new std::function< void (eqlib::PlayerClient *,char const *) >(result); 
+  return jresult;
 }
 
 
@@ -3961,7 +4022,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IsAlias(char * jarg1) {
 
 SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_1(char * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
   char *arg1 = (char *) 0 ;
-  std::function< void (eqlib::PlayerClient *,char const *) > arg2 ;
+  SwigValueWrapper< std::function< void (eqlib::PlayerClient *,char const *) > > arg2 ;
   bool arg3 ;
   bool arg4 ;
   bool arg5 ;
@@ -3983,7 +4044,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_1(char * jarg1, void * jarg2
 
 SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_2(char * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4) {
   char *arg1 = (char *) 0 ;
-  std::function< void (eqlib::PlayerClient *,char const *) > arg2 ;
+  SwigValueWrapper< std::function< void (eqlib::PlayerClient *,char const *) > > arg2 ;
   bool arg3 ;
   bool arg4 ;
   std::function< void (eqlib::PlayerClient *,char const *) > *argp2 ;
@@ -4003,7 +4064,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_2(char * jarg1, void * jarg2
 
 SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_3(char * jarg1, void * jarg2, unsigned int jarg3) {
   char *arg1 = (char *) 0 ;
-  std::function< void (eqlib::PlayerClient *,char const *) > arg2 ;
+  SwigValueWrapper< std::function< void (eqlib::PlayerClient *,char const *) > > arg2 ;
   bool arg3 ;
   std::function< void (eqlib::PlayerClient *,char const *) > *argp2 ;
   
@@ -4021,7 +4082,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_3(char * jarg1, void * jarg2
 
 SWIGEXPORT void SWIGSTDCALL CSharp_AddCommand__SWIG_4(char * jarg1, void * jarg2) {
   char *arg1 = (char *) 0 ;
-  std::function< void (eqlib::PlayerClient *,char const *) > arg2 ;
+  SwigValueWrapper< std::function< void (eqlib::PlayerClient *,char const *) > > arg2 ;
   std::function< void (eqlib::PlayerClient *,char const *) > *argp2 ;
   
   arg1 = (char *)jarg1; 
@@ -13095,438 +13156,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GetExpansionNumber(void * jarg1) {
   arg1 = *argp1; 
   result = (uint32_t)mq::GetExpansionNumber(SWIG_STD_MOVE(arg1));
   jresult = (unsigned int)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdHelp_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdHelp = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdHelp_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdHelp;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdWho_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdWho = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdWho_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdWho;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdWhoTarget_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdWhoTarget = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdWhoTarget_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdWhoTarget;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdLocation_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdLocation = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdLocation_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdLocation;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdFace_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdFace = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdFace_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdFace;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdTarget_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdTarget = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdTarget_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdTarget;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdCharInfo_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdCharInfo = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdCharInfo_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdCharInfo;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdFilter_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdFilter = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdFilter_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdFilter;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdDoAbility_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdDoAbility = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdDoAbility_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdDoAbility;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdCast_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdCast = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdCast_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdCast;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdUseItem_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdUseItem = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdUseItem_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdUseItem;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdHotbutton_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdHotbutton = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdHotbutton_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdHotbutton;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdTaskQuit_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdTaskQuit = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdTaskQuit_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdTaskQuit;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdPet_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdPet = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdPet_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdPet;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdMercSwitch_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdMercSwitch = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdMercSwitch_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdMercSwitch;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdPickZone_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdPickZone = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdPickZone_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdPickZone;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdAssist_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdAssist = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdAssist_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdAssist;
-  jresult = new fEQCommand(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_cmdQuit_set(void * jarg1) {
-  fEQCommand arg1 ;
-  fEQCommand *argp1 ;
-  
-  argp1 = (fEQCommand *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null fEQCommand", 0);
-    return ;
-  }
-  arg1 = *argp1; 
-  mq::cmdQuit = arg1;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_cmdQuit_get() {
-  void * jresult ;
-  fEQCommand result;
-  
-  result = mq::cmdQuit;
-  jresult = new fEQCommand(result); 
   return jresult;
 }
 

@@ -1006,3 +1006,24 @@
 %ignore mq::EndMacro;
 %ignore mq::Echo;
 %ignore mq::GetNextArg;
+
+%ignore mq::cmdHelp;
+%ignore mq::cmdWho;
+%ignore mq::cmdWhoTarget;
+%ignore mq::cmdLocation;
+%ignore mq::cmdFace;
+%ignore mq::cmdTarget;
+%ignore mq::cmdCharInfo;
+%ignore mq::cmdFilter;
+%ignore mq::cmdCast;
+%ignore mq::cmdUseItem;
+%ignore mq::cmdHotButton;
+%ignore mq::cmdTaskQuit;
+%ignore mq::cmdPet;
+%ignore mq::cmdMercSwitch;
+%ignore mq::cmdPickZone;
+%ignore mq::cmdAssist;
+%ignore mq::cmdQuit;
+%ignore mq::cmdDoAbility;
+%ignore mq::cmdHotbutton;
+
