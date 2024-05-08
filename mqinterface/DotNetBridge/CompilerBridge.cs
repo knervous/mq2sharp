@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 public class LockfileMutex : IDisposable
 {
     private readonly string _fileName;
@@ -441,7 +443,7 @@ public static class MQInterface
         }
     }
 
-    private static ProgramSettings? _programPaths;
+    private static ProgramSettings? _programSettings;
     private static bool reload = false;
     private static List<MQEventHandler> handlers = [];
     private static List<System.Timers.Timer> timers = new List<System.Timers.Timer>();
@@ -453,78 +455,103 @@ public static class MQInterface
         return Path.GetDirectoryName(assemblyPath);
     });
 
-
-    private static System.Timers.Timer PollForChanges(ProgramSettings programSettings, Action callback)
+    private static FileSystemWatcher _fileSystemWatcher;
+    private static FileSystemWatcher CreateFileSystemWatcher(ProgramSettings programSettings, Action<ProgramSettings> callback)
     {
-        var timer = new System.Timers.Timer(500);
-        string path = programSettings.CompiledAssemblyPath;
-        DateTime lastCheck = Directory.Exists(path) ? programSettings.GetFileNames().Max(File.GetLastWriteTimeUtc) : DateTime.MinValue;
-        timer.Elapsed += (sender, args) =>
-        {
-            if (!Directory.Exists(path))
-            {
-                return;
-            }
+        var watcher = new FileSystemWatcher(programSettings.AbsolutePath);
+        watcher.NotifyFilter = NotifyFilters.CreationTime
+                             | NotifyFilters.DirectoryName
+                             | NotifyFilters.FileName
+                             | NotifyFilters.LastWrite;
 
-            var lastWriteTime = programSettings.GetFileNames()
-                .Max(file => File.GetLastWriteTimeUtc(file));
-
-            if (lastWriteTime > lastCheck)
+        watcher.Changed += (s, e) => {
+            if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
             {
-                Logger.Log($"Detected change in file at {path}- Reloading {programSettings.ProjectFileName}");
-                callback();
-                lastCheck = lastWriteTime;
+                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+                callback(programSettings);
             }
         };
-        timer.Start();
-        return timer;
+        
+        watcher.Created += (s, e) => {
+            if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
+            {
+                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+                callback(programSettings);
+            }
+        }; 
+
+        watcher.Deleted += (s, e) => {
+            Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+            callback(programSettings);
+        };
+
+        watcher.Renamed += (s, e) => {
+            if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
+            {
+                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+                callback(programSettings);
+            }
+        };
+
+        watcher.Error += (s, e) => {
+            var exception = e.GetException();
+            Logger.Log($"Exception trying to detect file changes for {programSettings.CompiledAssemblyPath()} - {exception.Message}");
+        };
+
+        watcher.Filter = $"*{programSettings.MacroType.SourceFileSuffix}";
+        watcher.IncludeSubdirectories = true;
+        watcher.EnableRaisingEvents = true;
+        return watcher;
     }
 
     public static void Initialize()
     {
-        try {
-        _programPaths =  new ProgramSettings(AssemblyDirectory.Value, "sharp", "sharp.csproj", "Sharp");
-        Logger.Log("Initialize from dotnet");
-        Logger.Log($"Watching for *.cs file changes in {_programPaths.AbsolutePath}");
-
-        // Example of adding a /command and handling it in C#
-        EQCommands.AddCommand("/sharp", (player, message) =>
+        try
         {
-            Logger.Log($"Got sharp command with args: {message} - My player name {player.Name}");
-        }, false, false, true);
+            _programSettings = new ProgramSettings(AssemblyDirectory.Value, "sharp", "sharp.csproj", "Sharp");
+            Logger.Log("Initialize from dotnet");
 
-        foreach (var timer in timers)
+            // Example of adding a /command and handling it in C#
+            EQCommands.AddCommand("/sharp", (player, message) =>
+            {
+                Logger.Log($"Got sharp command with args: {message} - My player name {player.Name}");
+            }, false, false, true);
+
+            foreach (var timer in timers)
+            {
+                timer.Stop();
+            }
+            timers.Clear();
+
+            if (Directory.Exists(_programSettings.AbsolutePath))
+            {
+                ReloadSharpWithLock(_programSettings);
+            }
+
+            Logger.Log($"Watching for {_programSettings.MacroType.SourceFileSuffix} file changes in {_programSettings.AbsolutePath}");
+            _fileSystemWatcher = CreateFileSystemWatcher(_programSettings, ReloadSharpAsync);
+
+        }
+        catch (Exception e)
         {
-            timer.Stop();
+            Logger.Log($"Got Exception {e.Message} {e.StackTrace}");
         }
-        timers.Clear();
-
-        if (Directory.Exists(_programPaths.AbsolutePath))
-        {
-            ReloadSharpWithLock();
-        }
-
-        timers.Add(PollForChanges(_programPaths, ReloadSharpAsync));
-        } catch (Exception e) { 
-        Logger.Log($"Got Exception {e.Message} {e.StackTrace}");
-        }
-       
     }
 
-    public static void ReloadSharpAsync()
+    internal static void ReloadSharpAsync(ProgramSettings programSettings)
     {
-        Task.Run(ReloadSharpWithLock);
+        Task.Run(() => ReloadSharpWithLock(programSettings));
     }
 
-    private static void ReloadSharpWithLock()
+    private static void ReloadSharpWithLock(ProgramSettings programSettings)
     {
-        var programAssemblyPath = _programPaths.CompiledAssemblyPath;
+        var programAssemblyPath = programSettings.CompiledAssemblyPath();
         if (File.Exists(programAssemblyPath))
         {
-            ReloadSharp(false);
+            ReloadSharp(false, programSettings);
             return;
         }
-        using (var mutex = new LockfileMutex($"lock{_programPaths.ProjectDirectory}AssemblyReload.lock"))
+        using (var mutex = new LockfileMutex($"lock{programSettings.ProjectDirectory}AssemblyReload.lock"))
         {
             var firstAcquire = mutex.Acquire();
             Logger.Log($"Acquired first lock: {firstAcquire}");
@@ -535,7 +562,7 @@ public static class MQInterface
                 {
                     if (counter++ % 10 == 0)
                     {
-                        Logger.Log($"Waiting to acquire {_programPaths.ProjectDirectory} lock...");
+                        Logger.Log($"Waiting to acquire {programSettings.ProjectDirectory} lock...");
                     }
                     Thread.Sleep(100);
                     if (File.Exists(programAssemblyPath))
@@ -545,11 +572,11 @@ public static class MQInterface
                 }
             }
 
-            ReloadSharp(firstAcquire);
+            ReloadSharp(firstAcquire, programSettings);
         }
     }
 
-    public static void ReloadSharp(bool firstAcquire)
+    internal static void ReloadSharp(bool firstAcquire, ProgramSettings programSettings)
     {
         reload = true;
         foreach (var handler in handlers)
@@ -564,9 +591,9 @@ public static class MQInterface
         {
             var counter = 0;
             var continueBuild = false;
-            while (!File.Exists(_programPaths.CompiledAssemblyPath))
+            while (!File.Exists(programSettings.CompiledAssemblyPath()))
             {
-                Logger.Log($"Waiting for another process to build {_programPaths.CompiledAssemblyPath} before continuing {counter} / 20");
+                Logger.Log($"Waiting for another process to build {programSettings.CompiledAssemblyPath()} before continuing {counter} / 20");
                 Thread.Sleep(1000);
                 if (counter++ > 20)
                 {
@@ -581,34 +608,34 @@ public static class MQInterface
                     try
                     {
 
-                        LoadDotNetProgram(_programPaths);
+                        LoadDotNetProgram(programSettings);
                         reload = false;
                         return;
 
                     }
                     catch (Exception e)
                     {
-                        Logger.Log($"Error loading existing {_programPaths.ProjectFileName} lib, continuing to recompile. {e.Message}");
+                        Logger.Log($"Error loading existing {programSettings.ProjectFileName} lib, continuing to recompile. {e.Message}");
                     }
                 }
             }
         }
 
-        if (File.Exists(_programPaths.CompiledAssemblyPath))
+        if (File.Exists(programSettings.CompiledAssemblyPath()))
         {
-            Logger.Log($"{_programPaths.ProjectFileName} dotnet lib up to date");
+            Logger.Log($"{programSettings.ProjectFileName} dotnet lib up to date");
             if (assemblyContext_ == null)
             {
                 try
                 {
-                    LoadDotNetProgram(_programPaths);
+                    LoadDotNetProgram(programSettings);
                     reload = false;
                     return;
 
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"Error loading existing {_programPaths.ProjectFileName} lib, continuing to recompile. {e.Message}");
+                    Logger.Log($"Error loading existing {programSettings.ProjectFileName} lib, continuing to recompile. {e.Message}");
 
                 }
 
@@ -624,17 +651,17 @@ public static class MQInterface
             GC.WaitForPendingFinalizers();
         }
 
-        if (!File.Exists(_programPaths.AbsoluteProjectFilePath))
+        if (!File.Exists(programSettings.AbsoluteProjectFilePath))
         {
-            Logger.Log($"Project path does not exist at {_programPaths.AbsoluteProjectFilePath}");
+            Logger.Log($"Project path does not exist at {programSettings.AbsoluteProjectFilePath}");
             return;
         }
 
-        if (Directory.Exists(_programPaths.OutDirectory))
+        if (Directory.Exists(programSettings.OutDirectory))
         {
             // Clean up existing dll and pdb
-            string[] filesToDelete = Directory.GetFiles(_programPaths.OutDirectory, "*", SearchOption.TopDirectoryOnly)
-                                .Where(f => Path.GetFileName(f).StartsWith(_programPaths.ProjectDirectory, StringComparison.OrdinalIgnoreCase))
+            string[] filesToDelete = Directory.GetFiles(programSettings.OutDirectory, "*", SearchOption.TopDirectoryOnly)
+                                .Where(f => Path.GetFileName(f).StartsWith(programSettings.ProjectDirectory, StringComparison.OrdinalIgnoreCase))
                                 .ToArray();
 
             // Delete each file
@@ -651,12 +678,12 @@ public static class MQInterface
             }
         }
 
-        assemblyContext_ = new CollectibleAssemblyLoadContext(_programPaths.OutDirectory);
+        assemblyContext_ = new CollectibleAssemblyLoadContext(programSettings.OutDirectory);
 
         var startInfo = new ProcessStartInfo
         {
             FileName = Path.Combine(AssemblyDirectory.Value, "DotNetCompiler.exe"),
-            Arguments = $"{_programPaths.AssemblyGuid} {_programPaths.OutDirectory} {_programPaths.AbsolutePath} {_programPaths.ProjectFileName}",
+            Arguments = $"{programSettings.AssemblyGuid()} {programSettings.OutDirectory} {programSettings.AbsolutePath} {programSettings.ProjectFileName}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -689,26 +716,26 @@ public static class MQInterface
                 string errorOutput = process.StandardError.ReadToEnd();
                 if (errorOutput.Length > 0 || output.Contains("FAILED"))
                 {
-                    Logger.Log($"Error compiling macro {_programPaths.ProjectFileName}:");
+                    Logger.Log($"Error compiling macro {programSettings.ProjectFileName}:");
                     Logger.Log(errorOutput);
                     Logger.Log(output);
                 }
                 else
                 {
                     Logger.Log(output);
-                    Logger.Log($"Loading macro assembly from: {_programPaths.CompiledAssemblyPath}");
-                    if (!File.Exists(_programPaths.CompiledAssemblyPath))
+                    Logger.Log($"Loading macro assembly from: {programSettings.CompiledAssemblyPath()}");
+                    if (!File.Exists(programSettings.CompiledAssemblyPath()))
                     {
-                        ReloadSharp(true);
+                        ReloadSharp(true, programSettings);
                         return;
                     }
 
-                    LoadDotNetProgram(_programPaths);
+                    LoadDotNetProgram(programSettings);
                 }
             }
             catch (Exception e)
             {
-                Logger.Log($"Exception in loading {_programPaths.ProjectDirectory} macro {e.Message}");
+                Logger.Log($"Exception in loading {programSettings.ProjectDirectory} macro {e.Message}");
             }
         }
         reload = false;
@@ -716,9 +743,9 @@ public static class MQInterface
 
     private static void LoadDotNetProgram(ProgramSettings programSettings)
     {
-        Logger.Log($"Loading sharp assembly from: {programSettings.CompiledAssemblyPath}");
+        Logger.Log($"Loading sharp assembly from: {programSettings.CompiledAssemblyPath()}");
         assemblyContext_ = new CollectibleAssemblyLoadContext(programSettings.OutDirectory);
-        sharpAssembly = assemblyContext_.LoadFromAssemblyPath(programSettings.CompiledAssemblyPath);
+        sharpAssembly = assemblyContext_.LoadFromAssemblyPath(programSettings.CompiledAssemblyPath());
         if (sharpAssembly.GetType(programSettings.StartupType) != null)
         {
             var Sharp = Activator.CreateInstance(sharpAssembly.GetType(programSettings.StartupType)) as MQEventHandler;
@@ -771,27 +798,53 @@ public class CollectibleAssemblyLoadContext : AssemblyLoadContext
 
 }
 
+internal class MacroType
+{
+    public static MacroType Unknown = new MacroType("");
+    public static MacroType CSharp = new MacroType(".cs");
+    public static MacroType FSharp = new MacroType(".fs");
+
+    private MacroType(string sourceFileSuffix) {
+        SourceFileSuffix = sourceFileSuffix;
+    }
+
+    public string SourceFileSuffix { get; }
+
+    public string[] GetFileNames(string path) {
+        if (string.IsNullOrWhiteSpace(SourceFileSuffix) || string.IsNullOrWhiteSpace(path)) { 
+            return Array.Empty<string>();
+        }
+
+        return System.IO.Directory.GetFiles(path, SourceFileSuffix, SearchOption.TopDirectoryOnly);
+    }
+
+    public static MacroType From(string projectFilePath) {
+        if (projectFilePath.EndsWith(".csproj"))
+        {
+            return MacroType.CSharp;
+        }
+        else if (projectFilePath.EndsWith(".fsproj"))
+        {
+            return MacroType.FSharp;
+        }
+
+        return MacroType.Unknown;
+
+    }
+}
+
 internal record ProgramSettings(string RootPath, string ProjectDirectory, string ProjectFileName, string StartupType)
 {
     public string AbsolutePath { get; } = Path.Combine(RootPath, ProjectDirectory);
     public string OutDirectory => Path.Combine(AbsolutePath, "out");
     public string AbsoluteProjectFilePath => Path.Combine(AbsolutePath, ProjectFileName);
-    public string AssemblyGuid => $"{ProjectDirectory}-{GetDirHash(AbsolutePath)}";
-    public string CompiledAssemblyPath => Path.Combine(OutDirectory, $"{AssemblyGuid}.dll");
+    public string AssemblyGuid() => $"{ProjectDirectory}-{GetDirHash(AbsolutePath)}";
+    public string CompiledAssemblyPath() => Path.Combine(OutDirectory, $"{AssemblyGuid()}.dll");
+    public MacroType MacroType => MacroType.From(AbsoluteProjectFilePath);
 
     public string[] GetFileNames()
     {
-        var path = Path.Combine(AbsolutePath);
-        if (path.EndsWith(".csproj"))
-        {
-            return System.IO.Directory.GetFiles(path, "*.cs", SearchOption.TopDirectoryOnly);
-        }
-        else if (path.EndsWith(".fsproj"))
-        {
-            return System.IO.Directory.GetFiles(path, "*.fs", SearchOption.TopDirectoryOnly);
-        }
-
-        return Array.Empty<string>();
+        return MacroType.GetFileNames(Path.Combine(AbsolutePath));
     }
 
     private static string GetDirHash(string path)
