@@ -7,12 +7,13 @@ class DotNetCompiler
         var guid = args[0];
         var outPath = args[1];
         var directoryPath = args[2];
+        var projectFileName = args[3];
         var compilerFlag = Environment.Is64BitProcess ? "-r win-x64" : "-r win-x86";
         Console.WriteLine("Using DotNetCompiler");
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"build --output {outPath} {compilerFlag} -nowarn:CS0114 -p:Configuration=Debug -p:AssemblyName={guid} {directoryPath}/sharp.csproj",
+            Arguments = $"build --output {outPath} {compilerFlag} -nowarn:CS0114 -p:Configuration=Debug -p:AssemblyName={guid} {directoryPath}/{projectFileName}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
