@@ -557,6 +557,8 @@ public static class MQInterface
             handler.Dispose();
         }
 
+        handlers.Clear();
+
         // If we were not the first acquire we expect this to be built by someone else eventually
         if (!firstAcquire)
         {
