@@ -5,6 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
+using System.Timers;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class LockfileMutex : IDisposable
 {
@@ -455,9 +456,54 @@ public static class MQInterface
         return Path.GetDirectoryName(assemblyPath);
     });
 
+    // https://stackoverflow.com/questions/67405323/c-sharp-throttle-example
+    // https://stackoverflow.com/questions/60230128/debounce-event-command-in-mvvm-pattern
+    // https://stackoverflow.com/questions/55107390/net-async-await-event-debouncer-throttler
+    public class Throttle<TEventArgs>
+    {
+        private readonly System.Timers.Timer _timer;
+        private object _lastSender;
+        private TEventArgs _lastEventArgs;
+
+        public Throttle(EventHandler<TEventArgs> eventHandler, TimeSpan interval)
+        {
+            _timer = new System.Timers.Timer
+            {
+                Interval = interval.TotalMilliseconds,
+                AutoReset = false
+            };
+            _timer.Elapsed += (s, e) =>
+            {
+                _timer.Stop();
+                eventHandler(_lastSender, _lastEventArgs);
+            };
+        }
+
+        public void ProcessEvent(object sender, TEventArgs args)
+        {
+            _timer.Stop();
+            _timer.Start();
+
+            _lastSender = sender;
+            _lastEventArgs = args;
+        }
+    }
+
     private static FileSystemWatcher _fileSystemWatcher;
     private static FileSystemWatcher CreateFileSystemWatcher(ProgramSettings programSettings, Action<ProgramSettings> callback)
     {
+        var timer = new System.Timers.Timer
+        {
+            Interval = 200,
+            AutoReset = false
+        };
+        timer.Elapsed += (s, e) =>
+        {
+            timer.Stop();
+            Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+            callback(programSettings);
+        };
+
         var watcher = new FileSystemWatcher(programSettings.AbsolutePath);
         watcher.NotifyFilter = NotifyFilters.CreationTime
                              | NotifyFilters.DirectoryName
@@ -467,29 +513,29 @@ public static class MQInterface
         watcher.Changed += (s, e) => {
             if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
             {
-                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
-                callback(programSettings);
+                timer.Stop();
+                timer.Start();
             }
         };
         
         watcher.Created += (s, e) => {
             if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
             {
-                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
-                callback(programSettings);
+                timer.Stop();
+                timer.Start();
             }
         }; 
 
         watcher.Deleted += (s, e) => {
-            Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
-            callback(programSettings);
+            timer.Stop();
+            timer.Start();
         };
 
         watcher.Renamed += (s, e) => {
             if (e.FullPath.EndsWith(programSettings.MacroType.SourceFileSuffix))
             {
-                Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
-                callback(programSettings);
+                timer.Stop();
+                timer.Start();
             }
         };
 
