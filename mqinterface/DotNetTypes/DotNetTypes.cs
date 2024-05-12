@@ -4,15 +4,9 @@
 // using System.Runtime.InteropServices;
 
 
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 
-public class Logger
-{
-    public static void Log(string message)
-    {
-        MQ2Sharp.MQLog(message, MQ2Sharp.CONCOLOR_YELLOW, 0);
-    }
-}
 
 public class EqFactory
 {
@@ -38,12 +32,12 @@ public abstract class MQEventHandler
         {
             while (!token.IsCancellationRequested)
             {
-                Main();
+                Main(_logger);
                 Thread.Sleep(10);
             }
         }, token);
     }
-    public virtual void Main() { }
+    public virtual void Main(ILogger<MQ2Sharp>? logger) { }
     public virtual void CleanUI() { }
     public virtual void ReloadUI() { }
     public virtual void DrawHUD() { }
@@ -65,6 +59,8 @@ public abstract class MQEventHandler
     public virtual void MacroStop(string macro) { }
     public virtual void LoadPlugin(string plugin) { }
     public virtual void UnloadPlugin(string plugin) { }
+
+    protected ILogger<MQ2Sharp>? _logger;
 }
 
 public delegate void CmdFunc(PlayerClient client, string msg);
@@ -73,24 +69,24 @@ public class EQCommands
 {
 
     public static List<string> Commands = [];
-    public static void AddCommand(string name, CmdFunc fn, bool eq = false, bool parse = true, bool inGame = false)
+    public static void AddCommand(string name, CmdFunc fn, bool eq = false, bool parse = true, bool inGame = false, ILogger? logger = null)
     {
-        Logger.Log($"Adding command: {name}");
+        logger?.LogInformation("Adding command: {NAME}", name);
         Commands.Add(name);
         var eqCommandFunc = MQ2Sharp.make_eqcmd_func((clientPtr, messagePtr) =>
         {
             var client = EqFactory.CreatePlayerClient(clientPtr, false);
-            string message = Marshal.PtrToStringAnsi(messagePtr);
+            string message = Marshal.PtrToStringAnsi(messagePtr) ?? "Unable to convert pointer to string.";
             fn.Invoke(client, message ?? "");
         });
         MQ2Sharp.AddCommand(name, eqCommandFunc, eq, parse, inGame);
     }
 
-    public static void FlushCommands()
+    public static void FlushCommands(ILogger? logger = null)
     {
         foreach (var c in Commands)
         {
-            Logger.Log($"Removing command: {c}");
+            logger?.LogInformation("Removing command: {COMMAND}", c);
             MQ2Sharp.RemoveCommand(c);
         }
         Commands.Clear();

@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Debugging;
+using Serilog.Sinks.MQConsole.Themes;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -5,8 +9,9 @@ using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
-using System.Timers;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Serilog.Extensions.Logging;
+using Serilog.Core;
+
 public class LockfileMutex : IDisposable
 {
     private readonly string _fileName;
@@ -55,6 +60,20 @@ public class LockfileMutex : IDisposable
 
 public static class MQInterface
 {
+    static readonly ILogger<MQ2Sharp> _logger;
+    static MQInterface()
+    {
+        var serilogLogger = new LoggerConfiguration()
+                    .MinimumLevel.Verbose()
+                    .WriteTo.MQConsole(theme: MQConsoleTheme.Colored)
+                    .WriteTo.Async(a => a.File($"{MQ2Sharp.gPathLogs}\\MQ2Sharp_log.txt", rollingInterval: RollingInterval.Day))
+                    .CreateLogger();
+
+        var loggerFactory = new LoggerFactory()
+            .AddSerilog(serilogLogger);
+
+        _logger = loggerFactory.CreateLogger<MQ2Sharp>();
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct MQEvent
@@ -197,11 +216,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype {args.Subtype} :: {Message}", args.Subtype, e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -227,11 +246,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype :: {Message}", e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -248,7 +267,7 @@ public static class MQInterface
         try
         {
             // Convert IntPtr to string
-            string message = Marshal.PtrToStringAnsi(args.Line);
+            string? message = Marshal.PtrToStringAnsi(args.Line);
 
             foreach (var handler in handlers)
             {
@@ -261,11 +280,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype :: {Message}", e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -281,12 +300,12 @@ public static class MQInterface
         bool ret = true;
         try
         {
-            string message = Marshal.PtrToStringAnsi(args.Line);
+            string? message = Marshal.PtrToStringAnsi(args.Line);
             foreach (var handler in handlers)
             {
                 ret = ret || handler.IncomingChat(message ?? "", args.Color);
             }
-            Logger.Log($"Incoming Chat Line: {message}, Color: {args.Color}");
+            _logger.LogInformation("Incoming Chat Line: '{message}', Color: {Color}", message, args.Color);
         }
         catch (Exception e)
         {
@@ -294,11 +313,11 @@ public static class MQInterface
             {
                 return ret;
             }
-            Logger.Log($"Error running sharp subtype :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype :: {Message}", e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -338,11 +357,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype {args.Subtype} :: {Message}", args.Subtype, e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -379,11 +398,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype {args.Subtype} :: {Message}", args.Subtype, e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -434,11 +453,11 @@ public static class MQInterface
             {
                 return;
             }
-            Logger.Log($"Error running sharp subtype {args.Subtype} :: {e.Message}");
+            _logger.LogError(e, "Error running sharp subtype {args.Subtype} :: {Message}", args.Subtype, e.Message);
             var inner = e.InnerException;
             while (inner != null)
             {
-                Logger.Log($"Error running sharp. Inner Exception: {inner.Message}");
+                _logger.LogError(inner, "Error running sharp. Inner Exception: {Message}", inner.Message);
                 inner = inner.InnerException;
             }
         }
@@ -453,7 +472,7 @@ public static class MQInterface
     private static Lazy<string> AssemblyDirectory = new Lazy<string>(() =>
     {
         string assemblyPath = Assembly.GetExecutingAssembly().Location;
-        return Path.GetDirectoryName(assemblyPath);
+        return Path.GetDirectoryName(assemblyPath) ?? "";
     });
 
     // https://stackoverflow.com/questions/67405323/c-sharp-throttle-example
@@ -489,7 +508,7 @@ public static class MQInterface
         }
     }
 
-    private static FileSystemWatcher _fileSystemWatcher;
+    private static FileSystemWatcher? _fileSystemWatcher;
     private static FileSystemWatcher CreateFileSystemWatcher(ProgramSettings programSettings, Action<ProgramSettings> callback)
     {
         var timer = new System.Timers.Timer
@@ -500,7 +519,7 @@ public static class MQInterface
         timer.Elapsed += (s, e) =>
         {
             timer.Stop();
-            Logger.Log($"Detected change in file at {programSettings.CompiledAssemblyPath()} - Reloading {programSettings.ProjectFileName}");
+            _logger.LogInformation("Detected change in file at {CompiledAssemblyPath} - Reloading {ProjectFileName}", programSettings.CompiledAssemblyPath(), programSettings.ProjectFileName);
             callback(programSettings);
         };
 
@@ -541,7 +560,7 @@ public static class MQInterface
 
         watcher.Error += (s, e) => {
             var exception = e.GetException();
-            Logger.Log($"Exception trying to detect file changes for {programSettings.CompiledAssemblyPath()} - {exception.Message}");
+            _logger.LogError(exception, "Exception trying to detect file changes for {CompiledAssemblyPath} - {Message}", programSettings.CompiledAssemblyPath(), exception.Message);
         };
 
         watcher.Filter = $"*{programSettings.MacroType.SourceFileSuffix}";
@@ -554,13 +573,13 @@ public static class MQInterface
     {
         try
         {
-            _programSettings = new ProgramSettings(AssemblyDirectory.Value, "sharp", "sharp.csproj", "Sharp");
-            Logger.Log("Initialize from dotnet");
+            _programSettings = new ProgramSettings(AssemblyDirectory.Value, "sharp", "sharp.csproj", "Sharp", _logger);
+            _logger.LogInformation("Initialize from dotnet");
 
             // Example of adding a /command and handling it in C#
             EQCommands.AddCommand("/sharp", (player, message) =>
             {
-                Logger.Log($"Got sharp command with args: {message} - My player name {player.Name}");
+                _logger.LogInformation("Got sharp command with args: {message} - My player name {PlayerName}", message, player.Name);
             }, false, false, true);
 
             foreach (var timer in timers)
@@ -574,13 +593,13 @@ public static class MQInterface
                 ReloadSharpWithLock(_programSettings);
             }
 
-            Logger.Log($"Watching for {_programSettings.MacroType.SourceFileSuffix} file changes in {_programSettings.AbsolutePath}");
+            _logger.LogInformation("Watching for {SourceFileSuffix} file changes in {AbsolutePath}", _programSettings.MacroType.SourceFileSuffix, _programSettings.AbsolutePath);
             _fileSystemWatcher = CreateFileSystemWatcher(_programSettings, ReloadSharpAsync);
 
         }
         catch (Exception e)
         {
-            Logger.Log($"Got Exception {e.Message} {e.StackTrace}");
+            _logger.LogError(e, "Got Exception {Message}", e.Message);
         }
     }
 
@@ -600,7 +619,7 @@ public static class MQInterface
         using (var mutex = new LockfileMutex($"lock{programSettings.ProjectDirectory}AssemblyReload.lock"))
         {
             var firstAcquire = mutex.Acquire();
-            Logger.Log($"Acquired first lock: {firstAcquire}");
+            _logger.LogInformation("Acquired first lock: {FirstAcquire}", firstAcquire);
             var counter = 0;
             if (!firstAcquire)
             {
@@ -608,7 +627,7 @@ public static class MQInterface
                 {
                     if (counter++ % 10 == 0)
                     {
-                        Logger.Log($"Waiting to acquire {programSettings.ProjectDirectory} lock...");
+                        _logger.LogInformation("Waiting to acquire {ProjectDirectory} lock...", programSettings.ProjectDirectory);
                     }
                     Thread.Sleep(100);
                     if (File.Exists(programAssemblyPath))
@@ -639,7 +658,7 @@ public static class MQInterface
             var continueBuild = false;
             while (!File.Exists(programSettings.CompiledAssemblyPath()))
             {
-                Logger.Log($"Waiting for another process to build {programSettings.CompiledAssemblyPath()} before continuing {counter} / 20");
+                _logger.LogInformation("Waiting for another process to build {CompiledAssemblyPath} before continuing {Counter} / 20", programSettings.CompiledAssemblyPath() ,counter);
                 Thread.Sleep(1000);
                 if (counter++ > 20)
                 {
@@ -661,7 +680,7 @@ public static class MQInterface
                     }
                     catch (Exception e)
                     {
-                        Logger.Log($"Error loading existing {programSettings.ProjectFileName} lib, continuing to recompile. {e.Message}");
+                        _logger.LogError(e, "Error loading existing {ProjectFileName} lib, continuing to recompile. {Message}", programSettings.ProjectFileName, e.Message);
                     }
                 }
             }
@@ -669,7 +688,7 @@ public static class MQInterface
 
         if (File.Exists(programSettings.CompiledAssemblyPath()))
         {
-            Logger.Log($"{programSettings.ProjectFileName} dotnet lib up to date");
+            _logger.LogInformation("{ProjectFileName} dotnet lib up to date", programSettings.ProjectFileName);
             if (assemblyContext_ == null)
             {
                 try
@@ -681,7 +700,7 @@ public static class MQInterface
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"Error loading existing {programSettings.ProjectFileName} lib, continuing to recompile. {e.Message}");
+                    _logger.LogError(e, "Error loading existing {ProjectFileName} lib, continuing to recompile. {Message}", programSettings.ProjectFileName, e.Message);
 
                 }
 
@@ -699,7 +718,7 @@ public static class MQInterface
 
         if (!File.Exists(programSettings.AbsoluteProjectFilePath))
         {
-            Logger.Log($"Project path does not exist at {programSettings.AbsoluteProjectFilePath}");
+            _logger.LogError("Project path does not exist at {AbsoluteProjectFilePath}", programSettings.AbsoluteProjectFilePath);
             return;
         }
 
@@ -719,7 +738,7 @@ public static class MQInterface
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"An error occurred while deleting file {file}: {ex.Message}");
+                    _logger.LogInformation($"An error occurred while deleting file {file}: {ex.Message}");
                 }
             }
         }
@@ -738,21 +757,21 @@ public static class MQInterface
         };
 
 
-        //Logger.Log($"RootPath \at{_programPaths.RootPath}\ax");
-        //Logger.Log($"ProjectDirectory \at{_programPaths.ProjectDirectory}\ax");
-        //Logger.Log($"ProjectFileName \at{_programPaths.ProjectFileName}\ax");
-        //Logger.Log($"Directory \at{_programPaths.Directory}\ax");
-        //Logger.Log($"OutDirectory \at{_programPaths.OutDirectory}\ax");
-        //Logger.Log($"ProjectFileDirectory \at{_programPaths.ProjectFileDirectory}\ax");
-        //Logger.Log($"AssemblyGuid() \at{_programPaths.AssemblyGuid()}\ax");
-        //Logger.Log($"CompiledAssemblyPath() \at{_programPaths.CompiledAssemblyPath()}\ax");
-        //Logger.Log($"Arguments \at{startInfo.Arguments}\ax");
+        _logger.LogDebug("RootPath {RootPath}", programSettings.RootPath);
+        _logger.LogDebug("ProjectDirectory {ProjectDirectory}", programSettings.ProjectDirectory);
+        _logger.LogDebug("ProjectFileName {ProjectFileName}", programSettings.ProjectFileName);
+        _logger.LogDebug("ProjectFileName {AbsolutePath}", programSettings.AbsolutePath);
+        _logger.LogDebug("Directory {AbsoluteProjectFilePath}", programSettings.AbsoluteProjectFilePath);
+        _logger.LogDebug("OutDirectory {OutDirectory}", programSettings.OutDirectory);
+        _logger.LogDebug("AssemblyGuid() {AssemblyGuid}", programSettings.AssemblyGuid());
+        _logger.LogDebug("CompiledAssemblyPath() {CompiledAssemblyPath}", programSettings.CompiledAssemblyPath());
+        _logger.LogDebug("Arguments {Arguments}", startInfo.Arguments);
 
         using (var process = Process.Start(startInfo))
         {
             if (process == null)
             {
-                Logger.Log($"Process was null when loading macro");
+                _logger.LogInformation($"Process was null when loading macro");
                 return;
             }
             try
@@ -762,14 +781,14 @@ public static class MQInterface
                 string errorOutput = process.StandardError.ReadToEnd();
                 if (errorOutput.Length > 0 || output.Contains("FAILED"))
                 {
-                    Logger.Log($"Error compiling macro {programSettings.ProjectFileName}:");
-                    Logger.Log(errorOutput);
-                    Logger.Log(output);
+                    _logger.LogError("Error compiling macro {ProjectFileName}:", programSettings.ProjectFileName);
+                    _logger.LogError(errorOutput);
+                    _logger.LogError(output);
                 }
                 else
                 {
-                    Logger.Log(output);
-                    Logger.Log($"Loading macro assembly from: {programSettings.CompiledAssemblyPath()}");
+                    _logger.LogInformation(output);
+                    _logger.LogInformation("Loading macro assembly from: {CompiledAssemblyPath}", programSettings.CompiledAssemblyPath());
                     if (!File.Exists(programSettings.CompiledAssemblyPath()))
                     {
                         ReloadSharp(true, programSettings);
@@ -781,7 +800,7 @@ public static class MQInterface
             }
             catch (Exception e)
             {
-                Logger.Log($"Exception in loading {programSettings.ProjectDirectory} macro {e.Message}");
+                _logger.LogError(e, "Exception in loading {ProjectDirectory} macro {Message}", programSettings.ProjectDirectory, e.Message);
             }
         }
         reload = false;
@@ -789,22 +808,23 @@ public static class MQInterface
 
     private static void LoadDotNetProgram(ProgramSettings programSettings)
     {
-        Logger.Log($"Loading sharp assembly from: {programSettings.CompiledAssemblyPath()}");
+        _logger.LogInformation("Loading sharp assembly from: {CompiledAssemblyPath}", programSettings.CompiledAssemblyPath());
         assemblyContext_ = new CollectibleAssemblyLoadContext(programSettings.OutDirectory);
         sharpAssembly = assemblyContext_.LoadFromAssemblyPath(programSettings.CompiledAssemblyPath());
-        if (sharpAssembly.GetType(programSettings.StartupType) != null)
+        Type? startupType = sharpAssembly.GetType(programSettings.StartupType);
+        if (startupType != null)
         {
-            var Sharp = Activator.CreateInstance(sharpAssembly.GetType(programSettings.StartupType)) as MQEventHandler;
+            var Sharp = Activator.CreateInstance(startupType) as MQEventHandler;
             if (Sharp != null)
             {
                 handlers.Add(Sharp);
-                Sharp.Main();
-                Logger.Log($"Successfully loaded .NET sharp quests with {sharpAssembly.GetTypes().Count()} exported types.");
+                Sharp.Main(_logger);
+                _logger.LogInformation("Successfully loaded .NET sharp Macro/Program with {TypesCount} exported types.", sharpAssembly.GetTypes().Count());
             }
         }
         else
         {
-            Logger.Log($"Unable to load type '{programSettings.StartupType}'. Loaded assembly types: {string.Join(", ", sharpAssembly.GetTypes().Select(x => x.Name))}");
+            _logger.LogError("Unable to load type '{StartupType}'. Loaded assembly types: {NumTypes}", programSettings.StartupType, string.Join(", ", sharpAssembly.GetTypes().Select(x => x.Name)));
         }
     }
 
@@ -825,7 +845,7 @@ public class CollectibleAssemblyLoadContext : AssemblyLoadContext
     }
 
 
-    protected override Assembly Load(AssemblyName assemblyName)
+    protected override Assembly? Load(AssemblyName assemblyName)
     {
         if (assemblyName.Name == "DotNetTypes")
         {
@@ -879,12 +899,12 @@ internal class MacroType
     }
 }
 
-internal record ProgramSettings(string RootPath, string ProjectDirectory, string ProjectFileName, string StartupType)
+internal record ProgramSettings(string RootPath, string ProjectDirectory, string ProjectFileName, string StartupType, ILogger<MQ2Sharp> Logger)
 {
     public string AbsolutePath { get; } = Path.Combine(RootPath, ProjectDirectory);
     public string OutDirectory => Path.Combine(AbsolutePath, "out");
     public string AbsoluteProjectFilePath => Path.Combine(AbsolutePath, ProjectFileName);
-    public string AssemblyGuid() => $"{ProjectDirectory}-{GetDirHash(AbsolutePath)}";
+    public string AssemblyGuid() => $"{ProjectDirectory}-{GetDirHash(AbsolutePath, Logger)}";
     public string CompiledAssemblyPath() => Path.Combine(OutDirectory, $"{AssemblyGuid()}.dll");
     public MacroType MacroType => MacroType.From(AbsoluteProjectFilePath);
 
@@ -893,11 +913,11 @@ internal record ProgramSettings(string RootPath, string ProjectDirectory, string
         return MacroType.GetFileNames(Path.Combine(AbsolutePath));
     }
 
-    private static string GetDirHash(string path)
+    private static string GetDirHash(string path, ILogger<MQ2Sharp> logger)
     {
         if (!System.IO.Directory.Exists(path))
         {
-            Logger.Log($"DirHash path not found: {path}");
+            logger.LogInformation($"DirHash path not found: {path}");
             return "";
         }
 
@@ -913,7 +933,7 @@ internal record ProgramSettings(string RootPath, string ProjectDirectory, string
 
             // Finalize the hash calculation
             md5.TransformFinalBlock(new byte[0], 0, 0); // Necessary to finalize the hash calculation
-            return BitConverter.ToString(md5.Hash).Replace("-", string.Empty);
+            return BitConverter.ToString(md5.Hash ?? Array.Empty<byte>()).Replace("-", string.Empty);
         }
     }
 

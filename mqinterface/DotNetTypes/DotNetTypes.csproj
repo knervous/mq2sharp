@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="DllExport" Version="1.7.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="8.0.3" />
   </ItemGroup>
 

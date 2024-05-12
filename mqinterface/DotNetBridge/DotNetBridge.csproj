@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableDynamicLoading>true</EnableDynamicLoading>
-    
+	  
     <!-- Use invariant globalization -->
     <InvariantGlobalization>true</InvariantGlobalization>
     <NeutralLanguage>en</NeutralLanguage>
@@ -14,10 +14,12 @@
   
   <ItemGroup>
     <ProjectReference Include="..\DotNetTypes\DotNetTypes.csproj" />
+    <ProjectReference Include="..\Serilog.Sinks.MQConsole\Serilog.Sinks.MQConsole.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DllExport" Version="1.7.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="8.0.3" />
   </ItemGroup>
 
